@@ -39,7 +39,7 @@ func Split(reader io.Reader) (err error) {
 
 	for i, srcImg := range gifbin.Image {
 		draw.Draw(overpaintImage, overpaintImage.Bounds(), srcImg, image.ZP, draw.Over)
-		file, err := os.Create(fmt.Sprintf("%s%d%s", FramePath, i, ".gif"))
+		file, err := os.Create(fmt.Sprintf("%s%04d%s", FramePath, i, ".gif"))
 		if err != nil {
 			return err
 		}
@@ -59,7 +59,7 @@ func Split(reader io.Reader) (err error) {
 }
 
 // EncodeAll creates gif animation from frames
-func EncodeAll() (err error) {
+func EncodeAll(delay int) (err error) {
 	files, err := ioutil.ReadDir(FramePath)
 	if err != nil {
 		return err
@@ -75,7 +75,7 @@ func EncodeAll() (err error) {
 		f.Close()
 
 		outGIF.Image = append(outGIF.Image, inGIF.(*image.Paletted))
-		outGIF.Delay = append(outGIF.Delay, 0)
+		outGIF.Delay = append(outGIF.Delay, delay)
 	}
 
 	f, _ := os.OpenFile(fmt.Sprintf("%s%s", FramePath, "output.gif"), os.O_WRONLY|os.O_CREATE, 0666)

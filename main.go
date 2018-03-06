@@ -15,5 +15,6 @@ func main() {
 	defer file.Close()
 	gif.FramePath = "./frames/"
 	gif.Split(file)
-	gif.EncodeAll()
+	gif.EncodeAll(10)
+	fmt.Println("Finish")
 }
