@@ -1,4 +1,7 @@
-package gif
+/*
+Package gifconv is simple gif manipurator.
+*/
+package gifconv
 
 import (
 	"fmt"
@@ -6,68 +9,60 @@ import (
 	"image/draw"
 	"image/gif"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
-var (
-	// FramePath is frame path of gif image
-	FramePath = "./frames/"
-)
+// FramePath is output path of gif image frames
+var FramePath = "./frames/"
 
 // Split decode reads and analyzes the given reader as a GIF image
-func Split(reader io.Reader) (err error) {
+func Split(reader io.Reader) ([]string, error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("Error while decoding: %s", r)
+			fmt.Printf("Error while decoding: %s", r)
 		}
 	}()
 
 	gifbin, err := gif.DecodeAll(reader)
 
 	if err != nil {
-		return err
+		fmt.Println("Decode error")
 	}
 
 	imgWidth, imgHeight := getGifDimensions(gifbin)
 
 	overpaintImage := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
 
-	if _, err := os.Stat(FramePath); os.IsNotExist(err) {
+	if _, err = os.Stat(FramePath); os.IsNotExist(err) {
 		os.Mkdir(FramePath, 0777)
 	}
 
+	framePaths := make([]string, 0, 0)
 	for i, srcImg := range gifbin.Image {
 		draw.Draw(overpaintImage, overpaintImage.Bounds(), srcImg, image.ZP, draw.Over)
-		file, err := os.Create(fmt.Sprintf("%s%04d%s", FramePath, i, ".gif"))
-		if err != nil {
-			return err
-		}
+		filePath := fmt.Sprintf("%s%04d%s", FramePath, i, ".gif")
+		file, _ := os.Create(filePath)
+		framePaths = append(framePaths, filePath)
 
 		opts := &gif.Options{}
 		opts.NumColors = 256
 		err = gif.Encode(file, overpaintImage, opts)
 
 		if err != nil {
-			return err
+			fmt.Println(err)
 		}
 
 		file.Close()
 	}
 
-	return nil
+	return framePaths, err
 }
 
 // EncodeAll creates gif animation from frames
-func EncodeAll(delay int) (err error) {
-	files, err := ioutil.ReadDir(FramePath)
-	if err != nil {
-		return err
-	}
-
+func EncodeAll(files []string, delay int) (err error) {
 	outGIF := &gif.GIF{}
 	for _, file := range files {
-		f, err := os.Open(FramePath + file.Name())
+		f, err := os.Open(file)
 		if err != nil {
 			fmt.Println("Error opening file")
 		}
