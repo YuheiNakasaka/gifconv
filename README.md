@@ -1,6 +1,8 @@
 # gifconv
 gifアニメの画像変換に特化したライブラリ
 
+[![CircleCI](https://circleci.com/gh/YuheiNakasaka/gifconv.svg?style=svg)](https://circleci.com/gh/YuheiNakasaka/gifconv)
+
 ## TODO
 - [x] 画像をフレームに分割する
 - [x] フレームを合成してGIFアニメにする
